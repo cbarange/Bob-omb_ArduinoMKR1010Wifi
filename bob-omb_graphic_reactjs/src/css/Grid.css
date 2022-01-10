@@ -1,0 +1,106 @@
+.board{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: #65666bb4;
+    border: 1px solid rgb(0, 0, 0);
+}
+
+.cursor-red {
+    animation: pulse-red 0.7s infinite;
+    border: 2px dashed red !important;
+    z-index: 99;
+}
+@keyframes pulse-red {
+    from {
+        box-shadow: 0 0 0 0 rgb(177, 17, 17, 0.5);
+    }
+    to {
+        box-shadow: 0 0 0 10px rgb(177, 17, 17);
+    }
+}
+
+.cursor-green {
+    animation: pulse-green 0.7s infinite;
+    border: 2px dashed green !important;
+    z-index: 99;
+}
+
+@keyframes pulse-green {
+    from {
+        box-shadow: 0 0 0 0 rgb(19, 155, 19, 0.5);
+    }
+    to {
+        box-shadow: 0 0 0 10px rgb(19, 155, 19);
+    }
+}
+
+.cursor-blue {
+    animation: pulse-blue 0.7s infinite;
+    border: 2px dashed blue !important;
+    z-index: 99;
+}
+
+@keyframes pulse-blue {
+    from {
+        box-shadow: 0 0 0 0 rgb(13, 110, 221, 0.5);
+    }
+    to {
+        box-shadow: 0 0 0 10px rgb(13, 110, 221);
+    }
+}
+
+.cursor-yellow {
+    animation: pulse-yellow 0.7s infinite;
+    border: 2px dashed yellow !important;
+    z-index: 99;
+}
+
+@keyframes pulse-yellow {
+    from {
+        box-shadow: 0 0 0 0 rgb(221, 200, 13, 0.5);
+    }
+    to {
+        box-shadow: 0 0 0 10px rgb(221, 200, 13);
+    }
+}
+
+.tile{
+    width: 48px;
+    height: 48px;
+    box-sizing: border-box;
+    border: 2px solid rgba(0, 0, 0, 0.808);
+    text-align: center;
+    line-height: 48px;
+    transition: all 1s ease;
+}
+
+.tile img{
+    max-width: 45px !important;
+    animation: rotate 1.5s 1;
+}
+
+@keyframes rotate {
+    0% {
+        transform: rotateY(0deg);
+    }
+    100% {
+        transform: rotateY(360deg);
+    }
+}
+
+.red{
+    background-color: rgb(177, 17, 17);
+}
+
+.green{
+    background-color: rgb(19, 155, 19);
+}
+
+.yellow{
+    background-color: rgb(221, 200, 13)
+}
+
+.blue{
+    background-color: rgb(13, 110, 221)
+}
