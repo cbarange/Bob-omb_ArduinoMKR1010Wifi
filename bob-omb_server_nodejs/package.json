@@ -1,0 +1,15 @@
+{
+  "name": "bob-omb_server",
+  "version": "1.0.0",
+  "main": "app.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon -L",
+    "start": "node app.js"    
+  },
+  "dependencies": {
+    "mqtt": "^4.3.4",
+    "nodemon": "^2.0.15",
+    "ws": "^8.4.0"
+  }
+}

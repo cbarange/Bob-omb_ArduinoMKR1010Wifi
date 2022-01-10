@@ -3,10 +3,16 @@
 #include <utility/wifi_drv.h> // Integrate RGB LED
 
 
-  
+int buttonUp_State, buttonLeft_State, buttonDown_State, buttonRight_State, buttonSelect_State = 0;         // variable for reading the pushbutton status
+const int buttonUp_Pin = 1;
+const int buttonRight_Pin = 2;
+const int buttonDown_Pin = 3;
+const int buttonLeft_Pin = 4;
+const int buttonSelect_Pin = 5;
+
 char ssid[] =  "freebox_mwa"; // "WIFI_LABO"; // "iPhone_mwa";
 char pass[] =  "clementbaranger"; //"EpsiWis2018!";// "patate00";
-int status = WL_IDLE_STATUS;     // the Wifi radio's status
+int status = WL_IDLE_STATUS; // the Wifi radio's status
 
 // if you don't want to use DNS (and reduce your sketch size)
 // use the numeric IP instead of the name for the server:
@@ -39,8 +45,14 @@ void setup() {
   WiFiDrv::pinMode(25, OUTPUT); // RBG Integrated LED
   WiFiDrv::pinMode(26, OUTPUT);
   WiFiDrv::pinMode(27, OUTPUT);
-
   
+  pinMode(buttonUp_Pin, INPUT_PULLUP);  // initialize the pushbutton pin as an input:
+  pinMode(buttonRight_Pin, INPUT_PULLUP);  // initialize the pushbutton pin as an input:
+  pinMode(buttonDown_Pin, INPUT_PULLUP);  // initialize the pushbutton pin as an input:
+  pinMode(buttonLeft_Pin, INPUT_PULLUP);  // initialize the pushbutton pin as an input:
+  pinMode(buttonSelect_Pin, INPUT_PULLUP);  // initialize the pushbutton pin as an input:
+  
+  /*
   while (status != WL_CONNECTED) { // attempt to connect to Wifi network:
     Serial.print("Attempting to connect to network: ");
     Serial.println(ssid);
@@ -69,7 +81,7 @@ void setup() {
     client.println("Connection: close");
     client.println();
   }
-  
+  */
 }
 
 void loop() {
@@ -78,9 +90,35 @@ void loop() {
   //printWifiStatus();
   //Serial.println("----------------------------------------");
 
-  led_rgb_integrate();
+  //led_rgb_integrate();
+
+  // read the state of the pushbutton value:
+  buttonUp_State = digitalRead(buttonUp_Pin);
+  buttonRight_State = digitalRead(buttonRight_Pin);
+  buttonDown_State = digitalRead(buttonDown_Pin);
+  buttonLeft_State = digitalRead(buttonLeft_Pin);
+  buttonSelect_State = digitalRead(buttonSelect_Pin);
   
-  while (client.available()) { // if there are incoming bytes available // from the server, read them and print them:  
+
+  // check if the pushbutton is pressed. If it is, the buttonState is HIGH:
+  if (buttonUp_State == LOW) {
+    Serial.println("UP");    
+  } 
+  else if  (buttonRight_State == LOW) {
+    Serial.println("RIGHT");    
+  } 
+  else if (buttonDown_State == LOW) {
+    Serial.println("DOWN");    
+  } 
+  else if (buttonLeft_State == LOW) {
+    Serial.println("LEFT");    
+  } 
+  else if (buttonSelect_State == LOW) {
+    Serial.println("SELECT");    
+  }
+  
+  delay(500);
+  /*while (client.available()) { // if there are incoming bytes available // from the server, read them and print them:  
     char c = client.read();
     Serial.write(c);
   }
@@ -92,7 +130,7 @@ void loop() {
     client.stop();
     // do nothing forevermore:
     while (true);
-  }
+  }*/
 }
 
 
