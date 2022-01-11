@@ -2,9 +2,18 @@ const WebSocket  = require('ws')
 const mqtt = require('mqtt')
 
 
-const wss = new WebSocket.Server({port: 8080})
-const mqtt_client  = mqtt.connect('mqtt://localhost:3000')
 
+
+const wss = new WebSocket.Server({port: 8080})
+CLIENTS=[]
+
+const mqtt_client  = mqtt.connect('mqtt://localhost:1883')
+
+// let player = { id: 'new-player', value: { color: 'red' } }
+// let tile = { id: 'tile', value: { x: 5, y: 5, color: 'red' } }
+// let score = { id: 'score', value: [1,2,3,4] }
+  
+  
 
 let players_available = ["red", "green", "yellow", "blue"]
 let players = [] // RED GREEN YELLOW BLUE  
@@ -14,12 +23,21 @@ let cursor = {'x':0, 'y':0}
 
 console.table(board)
 
+
+  
+
+
 const register =  message => {  
+  if (players.find(e=>e.id==message) == undefined) {
+    console.log()
+  }
+
   let color = players_available.shift(0)
   mqtt_client.publish(`${message}/color`, color)
   mqtt_client.subscribe(`${message}/move`, err => {} )
   console.log(`New player join the game ${message}→${color}`)
   players.push({'color':color, 'id':message})
+  CLIENTS.map(e=>e.send(JSON.stringify({id:'new-player', value:{color:color}})))
 }
 
 const move = (topic, message) => {
@@ -34,19 +52,24 @@ const move = (topic, message) => {
   switch(message.toString()){
     case 'UP':
       cursor.y = cursor.y>0?cursor.y-1:0
+      CLIENTS.map(e=>e.send(JSON.stringify({id:'cursor', value:{...cursor, color:player.color}})) )
     break;
     case 'RIGHT':
       cursor.x = cursor.x<14?cursor.x+1:14
+      CLIENTS.map(e=>e.send(JSON.stringify({id:'cursor', value:{...cursor, color:player.color}})) )
     break;
     case 'DOWN':
       cursor.y = cursor.y<14?cursor.y+1:14
+      CLIENTS.map(e=>e.send(JSON.stringify({id:'cursor', value:{...cursor, color:player.color}})) )
     break;
     case 'LEFT':
       cursor.x = cursor.x>0?cursor.x-1:0
+      CLIENTS.map(e=>e.send(JSON.stringify({id:'cursor', value:{...cursor, color:player.color}})) )
     break;
     case 'SELECT':
-      board[cursor.x][cursor.y]=player.color
+      board[cursor.y][cursor.x]=player.color
       current_player = (current_player+1)%players.length
+      CLIENTS.map(e=>e.send(JSON.stringify({id:'tile', value:{...cursor, color:player.color}})) )
     break;
     case 'DEBUG':
       console.table(board)
@@ -73,69 +96,11 @@ mqtt_client.on('message', function (topic, message) {
 
 
 
+wss.on('connection', ws => {
+  CLIENTS.push(ws)
+  console.log('New ws client')
+} )
 
-// wss.on('connection', ws => {
-//     ws.on('message', message => {
-//         console.log(`Message received ${message}`)
-//     })
-    
-//     let player = {
-//         id: 'new-player',
-//         value: {
-//             color: colors[Math.floor(Math.random() * colors.length)]
-//         }
-//     }
 
-//     ws.send(JSON.stringify(player))
 
-//     setInterval(function(){
-//         let tile = {
-//             id: 'tile',
-//             value: {
-//                 x: Math.floor(Math.random() * 15),
-//                 y: Math.floor(Math.random() * 15),
-//                 color: colors[Math.floor(Math.random() * colors.length)]
-//             }
-//         }
-//         console.log('new message')
-//         ws.send(JSON.stringify(tile))
-//         let score = {
-//             id: 'score',
-//             value: Array(4).fill(0).map(el => Math.floor(Math.random() * (15*15)))
-//         }
-//         ws.send(JSON.stringify(score))
-
-//         let nb = Math.floor(Math.random() * 300)
-//         if( nb >= 295 ){
-//             let reset = {
-//                 id: 'reset'
-//             }
-//             console.log('reset game')
-//             ws.send(JSON.stringify(reset))
-//         }
-        
-//         nb = Math.floor(Math.random() * 100)
-//         if( nb >= 75 ){
-//             let player = {
-//                 id: 'new-player',
-//                 value: {
-//                     color: colors[Math.floor(Math.random() * colors.length)]
-//                 }
-//             }
-        
-//             ws.send(JSON.stringify(player))
-//         }
-        
-//         nb = Math.floor(Math.random() * 100)
-//         if( nb >= 95 ){
-//             let player = {
-//                 id: 'remove-player',
-//                 value: {
-//                     color: colors[Math.floor(Math.random() * colors.length)]
-//                 }
-//             }
-        
-//             ws.send(JSON.stringify(player))
-//         }
-//     }, 1000)    
-// })
+  
