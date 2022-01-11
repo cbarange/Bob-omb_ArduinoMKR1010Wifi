@@ -3,8 +3,6 @@ import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'rea
 import Bob_Omb from '../medias/bob-omb.png'
 import '../css/Grid.css'
 
-const colors = ['gray', 'green']
-
 class Tile {
     constructor(x, y, color) {
         this.x = x
@@ -16,7 +14,7 @@ class Tile {
 export const Grid = forwardRef((props, ref) =>  {
     const [size] = useState(15)
     const [grid, setGrid] = useState([[]])
-    const [cursor, setCursor] = useState(new Tile(0, 5, 'red'))
+    const [cursor, setCursor] = useState(new Tile(0, 0, 'gray'))
 
     const createNewGrid = () => {
         // let newGrid = Array(size).fill(0).map((row, x) => new Array(size).fill(0).map((tile, y) => new Tile(x, y, colors[Math.floor(Math.random() * colors.length)])))
@@ -42,7 +40,7 @@ export const Grid = forwardRef((props, ref) =>  {
     const changeTile = (x, y, color) => {
         let updatedGrid = grid
         updatedGrid[x][y] = new Tile(x, y, color)
-        setGrid(updatedGrid)
+        setGrid([...updatedGrid])
     }
     
     useEffect(() => {

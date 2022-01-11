@@ -3,11 +3,16 @@ import { w3cwebsocket as WebSocket } from 'websocket';
 import { Grid } from './Grid'
 
 import Bowser from '../medias/Bowserjr_MP9.png'
+import Koopa from '../medias/Koopa.png'
+import Maskass from '../medias/Maskass.png'
+import Gomba from '../medias/Gomba.png'
+
 import '../css/Game.css'
 
-const client = WebSocket(`ws://192.168.1.103:8080`)
+const client = WebSocket(`ws://127.0.0.1:8080`)
 
 const colors = ['red', 'green', 'yellow', 'blue']
+const teams = [Bowser, Maskass, Koopa, Gomba]
 
 export const Game = () => {
     const [scores, setScores] = useState(Array(4).fill(0))
@@ -67,7 +72,7 @@ export const Game = () => {
                     <div>
                         {scores[props.team_id]} pts
                     </div>
-                    <img alt='bowser-jr' src={Bowser} />
+                    <img alt='bowser-jr' src={teams[props.team_id]} />
                 </div>
             )
         } else {
