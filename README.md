@@ -1,6 +1,17 @@
-# Bob-omb Reverse with Arduino MKR 1010 Wifi
+# Bob-omb Reverse with [Arduino MKR 1010 Wifi](https://docs.arduino.cc/hardware/mkr-wifi-1010/)
 > @cbarange & @j-peguet | 5th January 2022
 ---
+
+
+**IN WORK**
+https://docs.arduino.cc/tutorials/mkr-wifi-1010/mqtt-device-to-device
+https://docs.arduino.cc/tutorials/mkr-wifi-1010/hosting-a-webserver
+https://learn.adafruit.com/multi-tasking-the-arduino-part-1/using-millis-for-timing
+https://learn.adafruit.com/multi-tasking-the-arduino-part-1/now-for-two-at-once
+
+
+
+
 
 Place your Bob-ombs so they surround opposing Bob-ombs. Captured Bob-ombs change color and join your team. The player uith the most Bob-ombs at the end is the Hinner.
 
