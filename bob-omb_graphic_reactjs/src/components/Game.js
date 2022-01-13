@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, forwardRef } from 'react';
+import React, { useState, useEffect, useRef, forwardRef, useCallback } from 'react';
 import { w3cwebsocket as WebSocket } from 'websocket';
 import { Grid } from './Grid'
 
@@ -33,7 +33,7 @@ export const Game = () => {
             }
             if(data.id === 'tile'){
                 childRef.current.updateGrid(data.value.x, data.value.y, data.value.color)
-
+                setScores(childRef.current.getScores())
             }
             if(data.id === 'cursor'){
                 childRef.current.changeCursor(data.value.x, data.value.y, data.value.color)
@@ -60,7 +60,13 @@ export const Game = () => {
         client.onerror = (message) => {
             console.log(`Error: ${message}`)
         }
-      }, [])
+    }, [])
+
+    const callback = useCallback((x, y) => {
+        let data = JSON.stringify({x: x, y: y})
+        client.send(data)
+      }, []);
+    
 
     const DisplayTeam = ((props, ref) => {
         if(players[props.team_id]){
@@ -92,7 +98,7 @@ export const Game = () => {
                     <DisplayTeam team_id={0}/>
                     <DisplayTeam team_id={2}/>
                 </div>
-                <Grid ref={childRef} />
+                <Grid ref={childRef} parentCallback={callback}/>
                 <div className='column'>
                     <DisplayTeam team_id={1}/>
                     <DisplayTeam team_id={3}/>

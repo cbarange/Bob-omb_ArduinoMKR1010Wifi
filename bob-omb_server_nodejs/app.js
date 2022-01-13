@@ -17,50 +17,63 @@ CLIENTS=[]
 let players_available = ["red", "green", "yellow", "blue"]
 let players = [] // RED GREEN YELLOW BLUE  
 let current_player = 0
-let board = Array(15).fill().map(e=>e=Array(15).fill("")) // 15x15 board game
+let board_size = 15
+let board = Array(board_size).fill().map(e=>e=Array(board_size).fill("")) // 15x15 board game
 let cursor = {'x':0, 'y':0}
 
 console.table(board)
 
 const new_move_board = (color, board, cursor) => {
-  let axes = {up:{status:'suitable'}, right:{status:'suitable'}, down:{status:'suitable'}, left:{status:'suitable'}, up_right:{status:'suitable'}, down_right:{status:'suitable'}, down_left:{status:'suitable'}, up_left:{status:'suitable'} }
-  let coef = {up:{x:0,y:-1}, right:{x:1,y:0}, down:{x:0,y:1}, left:{x:-1,y:0}, up_right:{x:1,y:-1}, down_right:{x:1,y:1}, down_left:{x:-1,y:1}, up_left:{x:-1,y:-1} }
-  let to_color = []
-  let axes_state = {}
+  
+  console.table(board)
+  coef={'down':{'x':1 ,'y':0}, 'up':{'x':-1 ,'y':0}, 'left':{'x':0 ,'y':-1}, 'right':{'x':0,'y':1}, 'down_right':{'x':1 ,'y':1},'down_left':{'x':1 ,'y':-1}, 'up_right':{'x':-1 ,'y':1}, 'up_left':{'x':-1 ,'y':-1}}
+  for(let prop in coef)
+    coef[prop].status="suitable"
 
-  for(let i=1;i<15;i++){
-    for (let property in coef) {
-      let x = (coef[property].x * i) + cursor.x
-      let y = (coef[property].y * i) + cursor.y
-      // console.log('cursor:', cursor, 'property:', property, 'x:', x, 'y:', y, 'i:', i)
-      if(0<=x && x<=14 && 0<=y && y<=14){
-        if(axes[property].status=='suitable'){
-          if(board[x][y]!=color && board[x][y]!=''){
-            to_color.push({x:x, y:y, axe:property})
-          } else {
-            axes[property].status=='done'
+  to_color = []
+
+  for(let axe in coef){
+    for(let i=1;i<board_size;i++){
+      let x = (i*coef[axe].x)+cursor.x
+      let y = (i*coef[axe].y)+cursor.y
+      if(0<=x && x<board_size && 0<=y && y<board_size)
+        if(board[x][y]!=''){
+          if(coef[axe].status=="suitable"){
+            if(board[x][y]!=color){
+              //board[x][y]='v'
+              to_color.push({'x':x,'y':y, 'axe':axe})            
+            } else if(board[x][y]==color){
+              coef[axe].status="done"
+            }
           }
+        } else if (coef[axe].status!="done") {
+          coef[axe].status="find_empty"
         }
-      }
     }
   }
 
-  to_color.filter(e=>axes[e.axe].status=='done').map(e=>{
-    CLIENTS.map(c=>c.send(JSON.stringify({id:'tile', value:{...e, color:color}})) )
-  })
+  to_color = to_color.filter(e=>coef[e.axe].status=="done")
+  console.table(to_color)
+  
+
+  to_color.map(e=>board[e.x][e.y]=color)
+  to_color.map(e=> CLIENTS.map(c=> c.send(JSON.stringify({id:'tile', value:{x:e.x,y:e.y, color:color}})) ))
+  console.table(board)
 }
 
 const register =  message => {  
-  if (players.find(e=>e.id==message) == undefined) {
-    console.log()
+  let player = players.find(e=>e.id==message)
+  if (player != undefined) {
+    mqtt_client.publish(`${message}/color`, player.color)  
+    console.log(`Player reconnected ${message}→${player.color}`)
+  } else {
+    let color = players_available.shift(0)
+    mqtt_client.publish(`${message}/color`, color)
+    mqtt_client.subscribe(`${message}/move`, err => {} )
+    console.log(`New player join the game ${message}→${color}`)
+    players.push({'color':color, 'id':message})
+    CLIENTS.map(e=>e.send(JSON.stringify({id:'new-player', value:{color:color}})))
   }
-
-  let color = players_available.shift(0)
-  mqtt_client.publish(`${message}/color`, color)
-  mqtt_client.subscribe(`${message}/move`, err => {} )
-  console.log(`New player join the game ${message}→${color}`)
-  players.push({'color':color, 'id':message})
-  CLIENTS.map(e=>e.send(JSON.stringify({id:'new-player', value:{color:color}})))
 }
 
 const move = (topic, message) => {
@@ -72,31 +85,32 @@ const move = (topic, message) => {
 
   console.log(`Current player idx:${current_player}, id:${player_id}, color:${player.color}, cursor:${JSON.stringify(cursor)}, move:${message}`)
 
-  switch(message.toString()){
+  switch(message){
     case 'UP':
-      cursor.y = cursor.y>0?cursor.y-1:14
-      CLIENTS.map(e=>e.send(JSON.stringify({id:'cursor', value:{...cursor, color:player.color}})) )
-    break;
-    case 'RIGHT':
-      cursor.x = cursor.x<14?cursor.x+1:0
-      CLIENTS.map(e=>e.send(JSON.stringify({id:'cursor', value:{...cursor, color:player.color}})) )
-    break;
-    case 'DOWN':
-      cursor.y = cursor.y<14?cursor.y+1:0
-      CLIENTS.map(e=>e.send(JSON.stringify({id:'cursor', value:{...cursor, color:player.color}})) )
-    break;
-    case 'LEFT':
       cursor.x = cursor.x>0?cursor.x-1:14
       CLIENTS.map(e=>e.send(JSON.stringify({id:'cursor', value:{...cursor, color:player.color}})) )
     break;
+    case 'RIGHT':
+      cursor.y = cursor.y<14?cursor.y+1:0
+      CLIENTS.map(e=>e.send(JSON.stringify({id:'cursor', value:{...cursor, color:player.color}})) )
+    break;
+    case 'DOWN':
+      cursor.x = cursor.x<14?cursor.x+1:0
+      CLIENTS.map(e=>e.send(JSON.stringify({id:'cursor', value:{...cursor, color:player.color}})) )
+    break;
+    case 'LEFT':
+      cursor.y = cursor.y>0?cursor.y-1:14
+      CLIENTS.map(e=>e.send(JSON.stringify({id:'cursor', value:{...cursor, color:player.color}})) )
+    break;
     case 'SELECT':
-      if(board[cursor.y][cursor.x]!='')
+      if(board[cursor.x][cursor.y]!='')
         break;      
-      board[cursor.y][cursor.x]=player.color
-      current_player = (current_player+1)%players.length
+      board[cursor.x][cursor.y]=player.color
       CLIENTS.map(e=>e.send(JSON.stringify({id:'tile', value:{...cursor, color:player.color}})) )
+      current_player = (current_player+1)%players.length
       CLIENTS.map(e=>e.send(JSON.stringify({id:'cursor', value:{...cursor, color:players[current_player].color}})) )
       new_move_board(player.color, board, cursor)
+
       break;
     case 'RESET':
       current_player = 0
@@ -118,9 +132,9 @@ mqtt_client.on('connect', () => mqtt_client.subscribe('register', err => {} ) )
 mqtt_client.on('message', function (topic, message) {
   // message is Buffer
   if (topic == "register"){
-    register(message)
+    register(message.toString())
   } else if (topic.endsWith('move')){
-    move(topic, message)
+    move(topic, message.toString())
   } else {
     console.log(`⚠WARN, unknown MQTT TOPIC ${topic}, Message: ${message.toString()}`)  
   }
@@ -131,9 +145,16 @@ mqtt_client.on('message', function (topic, message) {
 
 wss.on('connection', ws => {
   CLIENTS.push(ws)
+  players.map(e=>ws.send(JSON.stringify({id:'new-player', value:{color:e.color}})))
+  board.map((col, col_idx)=>col.map((row, row_idx)=>row!=''?ws.send(JSON.stringify({id:'tile', value:{x:row_idx, y:col_idx,color:row}})):{}))
+  if (players.length>0)
+    ws.send(JSON.stringify({id:'cursor', value:{...cursor, color:players[current_player].color}}))
   console.log('New websocket client')
+
+  ws.on('message', message => {
+    cursor = JSON.parse(message.toString())
+    move(`${players[current_player].id}/move`, 'SELECT')
+  })
+
 } )
 
-
-
-  

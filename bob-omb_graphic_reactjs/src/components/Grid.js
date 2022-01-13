@@ -26,7 +26,7 @@ export const Grid = forwardRef((props, ref) =>  {
         let isCursor = (tile.x === cursor.x && tile.y === cursor.y)
         if (tile.color === 'gray') {
             return (
-            <div key={`${tile.x}-${tile.y}`} className={`tile ${isCursor ? `cursor-${cursor.color}` : ''}`} onClick={() => changeTile(tile.x, tile.y, 'red')}></div>
+            <div key={`${tile.x}-${tile.y}`} className={`tile ${isCursor ? `cursor-${cursor.color}` : ''}`} onClick={() => clickOnTile(tile.x, tile.y)}></div>
             )
         } else {
             return (
@@ -35,6 +35,19 @@ export const Grid = forwardRef((props, ref) =>  {
             </div>
             )
         }
+    }
+
+    const clickOnTile = (x, y) => {
+        props.parentCallback(x, y)
+    }
+
+    const countScores = () => {
+        let red = grid.flatMap(row => row.filter(tile => tile.color == 'red')).length
+        let green = grid.flatMap(row => row.filter(tile => tile.color == 'green')).length 
+        let yellow = grid.flatMap(row => row.filter(tile => tile.color == 'yellow')).length
+        let blue = grid.flatMap(row => row.filter(tile => tile.color == 'blue')).length
+        console.log([red, green, yellow, blue])
+        return [red, green, yellow, blue] 
     }
 
     const changeTile = (x, y, color) => {
@@ -59,6 +72,10 @@ export const Grid = forwardRef((props, ref) =>  {
 
         changeCursor(x, y, color){
             setCursor(new Tile(x, y, color))
+        },
+
+        getScores(){
+            return countScores()
         }
     
     }))

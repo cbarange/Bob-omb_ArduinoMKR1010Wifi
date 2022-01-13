@@ -3,7 +3,6 @@
 #include <Wire.h> // I2C Library
 #include <utility/wifi_drv.h> // Integrate RGB LED
 
-
 int buttonUp_State, buttonLeft_State, buttonDown_State, buttonRight_State, buttonSelect_State = 0;         // variable for reading the pushbutton status
 const int buttonUp_Pin = 1;
 const int buttonRight_Pin = 2;
@@ -67,19 +66,24 @@ void printWifiStatus() {
 
 void setup() {  
   Serial.begin(9600); //Initialize serial and wait for port to open:
-  while (!Serial);  
+  //while (!Serial); 
   
   WiFiDrv::pinMode(25, OUTPUT); // RBG Integrated LED
   WiFiDrv::pinMode(26, OUTPUT);
   WiFiDrv::pinMode(27, OUTPUT);
-  Serial.println("MKR1010Wifi Started !");
+  
   pinMode(buttonUp_Pin, INPUT_PULLUP);  // initialize the pushbutton pin as an input:
   pinMode(buttonRight_Pin, INPUT_PULLUP);  // initialize the pushbutton pin as an input:
   pinMode(buttonDown_Pin, INPUT_PULLUP);  // initialize the pushbutton pin as an input:
   pinMode(buttonLeft_Pin, INPUT_PULLUP);  // initialize the pushbutton pin as an input:
   pinMode(buttonSelect_Pin, INPUT_PULLUP);  // initialize the pushbutton pin as an input:
   
+  Serial.println("MKR1010Wifi Started !");
+  WiFi.macAddress(mac);
+  player_id = mac2String((byte*) &mac);
+  Serial.println("Player Id = "+player_id);
   
+  // Wifi
   while (status != WL_CONNECTED) { // attempt to connect to Wifi network:
     Serial.print("Attempting to connect to network: ");
     Serial.println(ssid);
@@ -93,34 +97,19 @@ void setup() {
   printWifiStatus();
   Serial.println("----------------------------------------");
 
+  // MQTT
   Serial.print("Attempting to connect to the MQTT broker: ");
   Serial.println(broker);
-
   if (!mqttClient.connect(broker, port)) {
     Serial.print("MQTT connection failed! Error code = ");
     Serial.println(mqttClient.connectError());
-
     while (1);
   }
-  
   Serial.println("You're connected to the MQTT broker!");
   Serial.println();
-  
-  
-  WiFi.macAddress(mac);
-
-  player_id = mac2String((byte*) &mac);
-  
-  Serial.println(player_id);
-
-  
-  
-  Serial.println("Player Id = "+player_id);
   mqttClient.beginMessage("register");
   mqttClient.print(player_id);
   mqttClient.endMessage();
-
-  
   /*
   Serial.println("\nStarting connection to server...");
  // if you get a connection, report back via serial:
