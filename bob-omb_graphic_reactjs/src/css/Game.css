@@ -1,6 +1,6 @@
 body{
   background-color: #65666b;
-  background-image: url("https://wallpapercave.com/wp/wp4663792.png");
+  background-image: url('../medias/bowser-castle.png');
 }
 
 .container{
@@ -8,6 +8,7 @@ body{
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    height: 100%;
 }
 
 .title{
@@ -40,11 +41,19 @@ body{
     flex-direction: column;
     align-items: center;
     justify-content: space-around;
-    padding: 40px;
+    padding: 30px;
     border-radius: 25%;
     margin: 10px;
 }
 
 .scores img{
     width: 200px;
+}
+
+.score-group {
+    margin-bottom: 10px;
+}
+
+.score{
+    font-size: 35px;
 }

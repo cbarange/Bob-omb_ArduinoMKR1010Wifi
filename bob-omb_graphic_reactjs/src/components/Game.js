@@ -73,11 +73,8 @@ export const Game = () => {
         if(players[props.team_id]){
             return(
                 <div className={`scores ${colors[props.team_id]}`} >
-                    <div>
-                        {colors[props.team_id]} team
-                    </div>
-                    <div>
-                        {scores[props.team_id]} pts
+                    <div className='score-group'>
+                        <span className="score">{scores[props.team_id]}</span> pts
                     </div>
                     <img alt='bowser-jr' src={teams[props.team_id]} />
                 </div>
