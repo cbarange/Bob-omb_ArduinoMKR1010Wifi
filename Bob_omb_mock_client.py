@@ -6,7 +6,7 @@ from paho.mqtt import client as mqtt_client
 import time
 import random
 
-broker = '10.0.3.99'
+broker = '172.20.10.3'#'10.0.3.99'
 port = 1883
 topic="test"
 # generate client ID with pub prefix randomly
@@ -29,11 +29,6 @@ def connect_mqtt():
 def publish(client, message, topic):
   result = client.publish(topic, message)
     
-
-
-
-
-
 
 client = connect_mqtt()
 client.loop_start()

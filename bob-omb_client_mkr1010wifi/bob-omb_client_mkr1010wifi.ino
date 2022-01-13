@@ -15,13 +15,7 @@ char pass[] =  "patate00"; // "clementbaranger"; //"EpsiWis2018!";//
 byte mac[6];
 int status = WL_IDLE_STATUS; // the Wifi radio's status
 
-// if you don't want to use DNS (and reduce your sketch size)
-// use the numeric IP instead of the name for the server:
-//IPAddress server(74,125,232,128);  // numeric IP for Google (no DNS)
-char server[] = "arduinomkr1010.free.beeceptor.com";    // name address for Google (using DNS)
-// Initialize the Ethernet client library
-// with the IP address and port of the server
-// that you want to connect to (port 80 is default for HTTP):
+
 WiFiClient client;
 
 MqttClient mqttClient(client);
@@ -30,7 +24,7 @@ const char broker[] = "172.20.10.3";
 int port = 1883;
 
 //set interval for sending messages (milliseconds)
-const long interval = 150;
+const long interval = 100;
 unsigned long previousMillis = 0;
 
 int count = 0;
@@ -49,6 +43,22 @@ String mac2String(byte ar[]) {
   return s;
 }
 
+String getValue(String data, char separator, int index)
+{
+    int found = 0;
+    int strIndex[] = { 0, -1 };
+    int maxIndex = data.length() - 1;
+
+    for (int i = 0; i <= maxIndex && found <= index; i++) {
+        if (data.charAt(i) == separator || i == maxIndex) {
+            found++;
+            strIndex[0] = strIndex[1] + 1;
+            strIndex[1] = (i == maxIndex) ? i+1 : i;
+        }
+    }
+    return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+}
+
 void printWifiStatus() {
   Serial.println("Board Information:");// print your board's IP address:  
   IPAddress ip = WiFi.localIP();
@@ -64,10 +74,38 @@ void printWifiStatus() {
   Serial.println(" dBm");
 }
 
+void led_rgb_integrate(int red,int green, int blue){
+  // Integrate RGB LED
+  WiFiDrv::analogWrite(25, green); //GREEN  
+  WiFiDrv::analogWrite(26, red);   //RED  
+  WiFiDrv::analogWrite(27, blue);   //BLUE
+}
+
+void onMqttMessage(int messageSize) {
+  // we received a message, print out the topic and contents
+  Serial.println("Received a message with topic '");
+  Serial.print(mqttClient.messageTopic());
+  Serial.print("', length ");
+  Serial.print(messageSize);
+  Serial.println(" bytes:");
+
+  String color = "";
+  // use the Stream interface to print the contents
+  while (mqttClient.available()) {
+    color = color + String((char)mqttClient.read());    
+  }
+  Serial.println(" color: "+color);
+  led_rgb_integrate(getValue(color, ':', 0).toInt(),getValue(color, ':', 1).toInt(),getValue(color, ':', 2).toInt());
+  Serial.println();
+  Serial.println();
+}
+
+
 void setup() {  
   Serial.begin(9600); //Initialize serial and wait for port to open:
   //while (!Serial); 
-  
+  Serial.println("MKR1010Wifi Started !");
+  led_rgb_integrate(10,10,10);
   WiFiDrv::pinMode(25, OUTPUT); // RBG Integrated LED
   WiFiDrv::pinMode(26, OUTPUT);
   WiFiDrv::pinMode(27, OUTPUT);
@@ -78,11 +116,17 @@ void setup() {
   pinMode(buttonLeft_Pin, INPUT_PULLUP);  // initialize the pushbutton pin as an input:
   pinMode(buttonSelect_Pin, INPUT_PULLUP);  // initialize the pushbutton pin as an input:
   
-  Serial.println("MKR1010Wifi Started !");
   WiFi.macAddress(mac);
   player_id = mac2String((byte*) &mac);
   Serial.println("Player Id = "+player_id);
   
+  led_rgb_integrate(0,0,0);
+  delay(350);
+  led_rgb_integrate(10,50,50);
+  delay(350);
+  led_rgb_integrate(0,0,0);
+  delay(350);
+  led_rgb_integrate(10,50,50);
   // Wifi
   while (status != WL_CONNECTED) { // attempt to connect to Wifi network:
     Serial.print("Attempting to connect to network: ");
@@ -92,6 +136,15 @@ void setup() {
     // wait 8 seconds for connection:
     delay(8000);
   }
+
+  led_rgb_integrate(255,192,200);
+  delay(350);
+  led_rgb_integrate(255,192,200);
+  delay(350);
+  led_rgb_integrate(255,192,200);
+  delay(350);
+  led_rgb_integrate(255,192,200);
+
   Serial.println("You're connected to the network"); // you're connected now, so print out the data:
   Serial.println("----------------------------------------");
   printWifiStatus();
@@ -105,23 +158,27 @@ void setup() {
     Serial.println(mqttClient.connectError());
     while (1);
   }
+  led_rgb_integrate(0,0,0);
+  delay(350);
+  led_rgb_integrate(100,100,50);
+  delay(350);
+  led_rgb_integrate(0,0,0);
+  delay(350);
+  led_rgb_integrate(100,100,50);
+  delay(350);
+  led_rgb_integrate(0,0,0);
   Serial.println("You're connected to the MQTT broker!");
   Serial.println();
+
+  
+  // set the message receive callback
+  mqttClient.onMessage(onMqttMessage);
+  mqttClient.subscribe(player_id+"/color");
+
   mqttClient.beginMessage("register");
   mqttClient.print(player_id);
   mqttClient.endMessage();
-  /*
-  Serial.println("\nStarting connection to server...");
- // if you get a connection, report back via serial:
- if (client.connect(server, 80)) {
-    Serial.println("connected to server");
-    // Make a HTTP request:
-    client.println("GET /search?q=arduino HTTP/1.1");    
-    client.println("Host: "+String(server));
-    client.println("Connection: close");
-    client.println();
-  }
-  */
+  
 }
 
 void loop() {
@@ -173,47 +230,4 @@ void loop() {
       mqttClient.endMessage();
     }
   }
-  
-  //led_rgb_integrate();
-
-  
-  //delay(500);
-  /*while (client.available()) { // if there are incoming bytes available // from the server, read them and print them:  
-    char c = client.read();
-    Serial.write(c);
-  }
-
-  
-  if (!client.connected()) { // if the server's disconnected, stop the client:
-    Serial.println();
-    Serial.println("disconnecting from server.");
-    client.stop();
-    // do nothing forevermore:
-    while (true);
-  }*/
-}
-
-
-void led_rgb_integrate(){
-  // Integrate RGB LED
-  WiFiDrv::analogWrite(25, 135); //GREEN  
-  WiFiDrv::analogWrite(26, 50);   //RED  
-  WiFiDrv::analogWrite(27, 198);   //BLUE
-  delay(200);
-  WiFiDrv::analogWrite(25, 255); // FULL GREEN
-  WiFiDrv::analogWrite(26, 0);
-  WiFiDrv::analogWrite(27, 0);
-  delay(200);
-  WiFiDrv::analogWrite(25, 0); // FULL RED
-  WiFiDrv::analogWrite(26, 255);
-  WiFiDrv::analogWrite(27, 0);
-  delay(200);
-  WiFiDrv::analogWrite(25, 0); // FULL BLUE
-  WiFiDrv::analogWrite(26, 0);
-  WiFiDrv::analogWrite(27, 255);
-  delay(50);
-  WiFiDrv::analogWrite(25, 0); // OFF LED
-  WiFiDrv::analogWrite(26, 0);
-  WiFiDrv::analogWrite(27, 0);
-  delay(0);
 }
