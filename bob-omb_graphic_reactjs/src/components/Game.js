@@ -1,13 +1,18 @@
-import React, { useState, useEffect, useRef, forwardRef } from 'react';
+import React, { useState, useEffect, useRef, forwardRef, useCallback } from 'react';
 import { w3cwebsocket as WebSocket } from 'websocket';
 import { Grid } from './Grid'
 
 import Bowser from '../medias/Bowserjr_MP9.png'
+import Koopa from '../medias/Koopa.png'
+import Maskass from '../medias/Maskass.png'
+import Gomba from '../medias/Gomba.png'
+
 import '../css/Game.css'
 
-const client = WebSocket(`ws://192.168.1.103:8080`)
+const client = WebSocket(`ws://127.0.0.1:8080`)
 
 const colors = ['red', 'green', 'yellow', 'blue']
+const teams = [Bowser, Maskass, Koopa, Gomba]
 
 export const Game = () => {
     const [scores, setScores] = useState(Array(4).fill(0))
@@ -28,7 +33,7 @@ export const Game = () => {
             }
             if(data.id === 'tile'){
                 childRef.current.updateGrid(data.value.x, data.value.y, data.value.color)
-
+                setScores(childRef.current.getScores())
             }
             if(data.id === 'cursor'){
                 childRef.current.changeCursor(data.value.x, data.value.y, data.value.color)
@@ -55,7 +60,13 @@ export const Game = () => {
         client.onerror = (message) => {
             console.log(`Error: ${message}`)
         }
-      }, [])
+    }, [])
+
+    const callback = useCallback((x, y) => {
+        let data = JSON.stringify({x: x, y: y})
+        client.send(data)
+      }, []);
+    
 
     const DisplayTeam = ((props, ref) => {
         if(players[props.team_id]){
@@ -67,7 +78,7 @@ export const Game = () => {
                     <div>
                         {scores[props.team_id]} pts
                     </div>
-                    <img alt='bowser-jr' src={Bowser} />
+                    <img alt='bowser-jr' src={teams[props.team_id]} />
                 </div>
             )
         } else {
@@ -87,7 +98,7 @@ export const Game = () => {
                     <DisplayTeam team_id={0}/>
                     <DisplayTeam team_id={2}/>
                 </div>
-                <Grid ref={childRef} />
+                <Grid ref={childRef} parentCallback={callback}/>
                 <div className='column'>
                     <DisplayTeam team_id={1}/>
                     <DisplayTeam team_id={3}/>

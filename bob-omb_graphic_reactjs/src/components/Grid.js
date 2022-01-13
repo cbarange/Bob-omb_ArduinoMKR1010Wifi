@@ -3,8 +3,6 @@ import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'rea
 import Bob_Omb from '../medias/bob-omb.png'
 import '../css/Grid.css'
 
-const colors = ['gray', 'green']
-
 class Tile {
     constructor(x, y, color) {
         this.x = x
@@ -16,7 +14,7 @@ class Tile {
 export const Grid = forwardRef((props, ref) =>  {
     const [size] = useState(15)
     const [grid, setGrid] = useState([[]])
-    const [cursor, setCursor] = useState(new Tile(0, 5, 'red'))
+    const [cursor, setCursor] = useState(new Tile(0, 0, 'gray'))
 
     const createNewGrid = () => {
         // let newGrid = Array(size).fill(0).map((row, x) => new Array(size).fill(0).map((tile, y) => new Tile(x, y, colors[Math.floor(Math.random() * colors.length)])))
@@ -28,7 +26,7 @@ export const Grid = forwardRef((props, ref) =>  {
         let isCursor = (tile.x === cursor.x && tile.y === cursor.y)
         if (tile.color === 'gray') {
             return (
-            <div key={`${tile.x}-${tile.y}`} className={`tile ${isCursor ? `cursor-${cursor.color}` : ''}`} onClick={() => changeTile(tile.x, tile.y, 'red')}></div>
+            <div key={`${tile.x}-${tile.y}`} className={`tile ${isCursor ? `cursor-${cursor.color}` : ''}`} onClick={() => clickOnTile(tile.x, tile.y)}></div>
             )
         } else {
             return (
@@ -39,10 +37,23 @@ export const Grid = forwardRef((props, ref) =>  {
         }
     }
 
+    const clickOnTile = (x, y) => {
+        props.parentCallback(x, y)
+    }
+
+    const countScores = () => {
+        let red = grid.flatMap(row => row.filter(tile => tile.color == 'red')).length
+        let green = grid.flatMap(row => row.filter(tile => tile.color == 'green')).length 
+        let yellow = grid.flatMap(row => row.filter(tile => tile.color == 'yellow')).length
+        let blue = grid.flatMap(row => row.filter(tile => tile.color == 'blue')).length
+        console.log([red, green, yellow, blue])
+        return [red, green, yellow, blue] 
+    }
+
     const changeTile = (x, y, color) => {
         let updatedGrid = grid
         updatedGrid[x][y] = new Tile(x, y, color)
-        setGrid(updatedGrid)
+        setGrid([...updatedGrid])
     }
     
     useEffect(() => {
@@ -61,6 +72,10 @@ export const Grid = forwardRef((props, ref) =>  {
 
         changeCursor(x, y, color){
             setCursor(new Tile(x, y, color))
+        },
+
+        getScores(){
+            return countScores()
         }
     
     }))

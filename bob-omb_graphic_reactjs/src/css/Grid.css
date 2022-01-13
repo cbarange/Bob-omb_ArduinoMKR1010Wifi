@@ -1,9 +1,14 @@
 .board{
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     background-color: #65666bb4;
     border: 1px solid rgb(0, 0, 0);
+}
+
+.row{
+    display: flex;
+    flex-direction: row;
 }
 
 .cursor-red {
