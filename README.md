@@ -1,5 +1,5 @@
 # Bob-omb Reverse with [Arduino MKR 1010 Wifi](https://docs.arduino.cc/hardware/mkr-wifi-1010/)
-> @cbarange & @j-peguet | 5th January 2022
+> 🐦 [@cbarange](https://twitter.com/cbarange_dev) & [@j-peguet](https://twitter.com/j_peguet) | 5th January 2022
 ---
 
 ## Intro
@@ -11,10 +11,11 @@
 MQTT with Arduino 👉 https://docs.arduino.cc/tutorials/mkr-wifi-1010/mqtt-device-to-device
 
 
-**Let's play a game 👇**
+**See how to play a game 👇**
 
 [![Video Presentation](https://img.youtube.com/vi/c6gmPTDR9IY/0.jpg)](https://www.youtube.com/watch?v=c6gmPTDR9IY)
 
+> https://www.youtube.com/watch?v=c6gmPTDR9IY
 
 ## The Game
 
@@ -101,7 +102,8 @@ yarn install # Install Yarn with sudo apt install nodejs npm && npm i -g yarn
 yarn dev
 ```
 
-![start_game_front.png](image/start_game_front.png)
+![](image/nodejs_server.png)
+
 
 ### Flash Bob-omb Arduino Client
 
@@ -118,6 +120,8 @@ yarn install # Install Yarn with sudo apt install nodejs npm && npm i -g yarn
 yarn start
 # Open web browser on http://localhost:3000
 ```
+
+![start_game_front.png](image/start_game_front.png)
 
 ### Press RESET button on arduino boards and wait util their LED turn Red,Green,Blue or Yellow
 
