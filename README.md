@@ -2,18 +2,26 @@
 > @cbarange & @j-peguet | 5th January 2022
 ---
 
-
-**IN WORK**
-https://docs.arduino.cc/tutorials/mkr-wifi-1010/mqtt-device-to-device
-https://docs.arduino.cc/tutorials/mkr-wifi-1010/hosting-a-webserver
-https://learn.adafruit.com/multi-tasking-the-arduino-part-1/using-millis-for-timing
-https://learn.adafruit.com/multi-tasking-the-arduino-part-1/now-for-two-at-once
+## Intro
 
 
+![](image/schema.drawio.png)
+
+**Docs**
+MQTT with Arduino 👉 https://docs.arduino.cc/tutorials/mkr-wifi-1010/mqtt-device-to-device
 
 
+**Let's play a game 👇**
+
+[![Video Presentation](https://img.youtube.com/vi/c6gmPTDR9IY/0.jpg)](https://www.youtube.com/watch?v=c6gmPTDR9IY)
+
+
+## The Game
 
 Place your Bob-ombs so they surround opposing Bob-ombs. Captured Bob-ombs change color and join your team. The player uith the most Bob-ombs at the end is the Hinner.
+
+![](image/end_game_front.png)
+
 
 ![](image/bob-omb_crazy.gif)
 
@@ -27,6 +35,9 @@ Place your Bob-ombs so they surround opposing Bob-ombs. Captured Bob-ombs change
 ### Arduino MKR 1010 Wifi PinOut
 
 ![](image/arduino_mkr_1010_wifi_pinout.jpg)
+
+
+![](image/arduino.jpg)
 
 ### Install Board Dependencies
 
@@ -59,23 +70,59 @@ Place your Bob-ombs so they surround opposing Bob-ombs. Captured Bob-ombs change
 ### Install MQQT Broker
 
 ```bash
+# - Open port between Windows and WSL -
 # In Powershell admin
 netsh interface portproxy add v4tov4 listenport=3000 listenaddress=0.0.0.0 connectport=3000 connectaddress=172.25.13.92 #←WLS IP
-# In WSL
-sudo apt install -y mosquitto mosquitto-clients python-mosquitto
-systemctl status mosquitto
-sudo systemctl enable mosquitto.service
 
-sudo mosquitto_passwd -c /etc/mosquitto/passwd USERNAME
+# In WSL install mqtt broker
+sudo apt install -y mosquitto mosquitto-clients
+systemctl status mosquitto
+
 sudo nano /etc/mosquitto/mosquitto.conf
 # allow_anonymous false
-# password_file /etc/mosquitto/passwd
-# listener 3000
-
-
+# listener 1883 0.0.0.0
 systemctl restart mosquitto
 
 mosquitto_pub -h 192.168.0.12 -p 3000 -t sensor/temperature -m 22.5 # -u user -P pass -r r indique au broker de retenir (ou pas) le message
 mosquitto_sub -h 192.168.0.12 -p 3000  -t "sensor/temperature"
-
 ```
+
+### Install [MQTT Fx](https://mqttfx.jensd.de/) (MQTT tools, optional)
+
+> Download link 👉 http://www.jensd.de/apps/mqttfx/1.7.1/
+
+![mqtt_fx.png](image/mqtt_fx.png)
+
+### Install Nodejs server (Listen MQTT and Send to Front Web UI with Websocket)
+
+```bash
+cd bob-omb_server_nodejs
+yarn install # Install Yarn with sudo apt install nodejs npm && npm i -g yarn
+yarn dev
+```
+
+![start_game_front.png](image/start_game_front.png)
+
+### Flash Bob-omb Arduino Client
+
+1. Open file `bob-omb_client_mkr1010wifi/bob-omb_client_mkr1010wifi.ino` with Arduino IDE 
+2. Edit Wifi SSID and MQTT Broker configuration (ssid[], pass[], broker[], port)
+![arduino_setup.png](image/arduino_setup.png)
+3. Flash board
+
+### Install and Run WEB UI
+
+```bash
+cd bob-omb_graphic_reactjs
+yarn install # Install Yarn with sudo apt install nodejs npm && npm i -g yarn
+yarn start
+# Open web browser on http://localhost:3000
+```
+
+### Press RESET button on arduino boards and wait util their LED turn Red,Green,Blue or Yellow
+
+* If LED is white, arduino try to connect to wifi
+* If LED is pink, arduino try to connect to mqtt broker
+* You can check serial output for debuging
+
+### Have fun 🎮 🔴 🔵 👾
