@@ -64,6 +64,7 @@ export const Game = () => {
 
     const callback = useCallback((x, y) => {
         let data = JSON.stringify({x: x, y: y})
+        console.log(`Clicked Tile ${x}/${y}`)
         client.send(data)
       }, []);
     
