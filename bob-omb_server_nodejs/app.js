@@ -19,6 +19,14 @@ let players = [] // RED GREEN YELLOW BLUE
 let current_player = 0
 let board_size = 15
 let board = Array(board_size).fill().map(e=>e=Array(board_size).fill("")) // 15x15 board game
+// board = Array(board_size).fill(0).map((row, x) => new Array(board_size).fill(0).map((tile, y) => `${x}/${y}`))
+board = Array(board_size).fill(0).map((row, x) => new Array(board_size).fill(0).map((tile, y) => ''))
+for(let i=12; i< 42; i++){
+  let random_x = Math.floor(Math.random() * board_size)
+  let random_y = Math.floor(Math.random() * board_size)
+  console.log(`New brick on tile ${random_x} ${random_y}`)
+  board[random_x][random_y] = 'X'
+}
 let cursor = {'x':0, 'y':0}
 
 console.table(board)
@@ -37,7 +45,7 @@ const new_move_board = (color, board, cursor) => {
       let x = (i*coef[axe].x)+cursor.x
       let y = (i*coef[axe].y)+cursor.y
       if(0<=x && x<board_size && 0<=y && y<board_size)
-        if(board[x][y]!=''){
+        if(board[x][y]!='' && board[x][y]!='X'){
           if(coef[axe].status=="suitable"){
             if(board[x][y]!=color){
               //board[x][y]='v'
@@ -61,14 +69,17 @@ const new_move_board = (color, board, cursor) => {
   console.table(board)
 }
 
+
+const rgb_color = {'red':'120:0:0', 'green':'0:120:0', 'blue':'0:0:120', 'yellow':'120:120:0'}
+
 const register =  message => {  
   let player = players.find(e=>e.id==message)
   if (player != undefined) {
-    mqtt_client.publish(`${message}/color`, player.color)  
+    mqtt_client.publish(`${message}/color`, rgb_color[player.color])  
     console.log(`Player reconnected ${message}→${player.color}`)
   } else {
     let color = players_available.shift(0)
-    mqtt_client.publish(`${message}/color`, color)
+    mqtt_client.publish(`${message}/color`, rgb_color[color])
     mqtt_client.subscribe(`${message}/move`, err => {} )
     console.log(`New player join the game ${message}→${color}`)
     players.push({'color':color, 'id':message})
@@ -104,7 +115,8 @@ const move = (topic, message) => {
     break;
     case 'SELECT':
       if(board[cursor.x][cursor.y]!='')
-        break;      
+        break;     
+      console.log(`Selected Tile ${cursor.x}/${cursor.y}`)
       board[cursor.x][cursor.y]=player.color
       CLIENTS.map(e=>e.send(JSON.stringify({id:'tile', value:{...cursor, color:player.color}})) )
       current_player = (current_player+1)%players.length
@@ -146,7 +158,7 @@ mqtt_client.on('message', function (topic, message) {
 wss.on('connection', ws => {
   CLIENTS.push(ws)
   players.map(e=>ws.send(JSON.stringify({id:'new-player', value:{color:e.color}})))
-  board.map((col, col_idx)=>col.map((row, row_idx)=>row!=''?ws.send(JSON.stringify({id:'tile', value:{x:row_idx, y:col_idx,color:row}})):{}))
+  board.map((row, row_idx)=>row.map((col, col_idx)=>col!=''?ws.send(JSON.stringify({id:'tile', value:{x:row_idx, y:col_idx,color:col}})):{}))
   if (players.length>0)
     ws.send(JSON.stringify({id:'cursor', value:{...cursor, color:players[current_player].color}}))
   console.log('New websocket client')

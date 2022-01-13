@@ -1,7 +1,10 @@
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react'
 
 import Bob_Omb from '../medias/bob-omb.png'
+import Brick from '../medias/brick.png'
 import '../css/Grid.css'
+
+const colors = ['red', 'green', 'yellow', 'blue']
 
 class Tile {
     constructor(x, y, color) {
@@ -24,15 +27,21 @@ export const Grid = forwardRef((props, ref) =>  {
 
     const displayBomb = (tile) => {
         let isCursor = (tile.x === cursor.x && tile.y === cursor.y)
-        if (tile.color === 'gray') {
+        if (tile.color === 'X') {
             return (
-            <div key={`${tile.x}-${tile.y}`} className={`tile ${isCursor ? `cursor-${cursor.color}` : ''}`} onClick={() => clickOnTile(tile.x, tile.y)}></div>
+            <div key={`${tile.x}-${tile.y}`} className={`tile ${isCursor ? `cursor-${cursor.color}` : ''}`}>
+                <img alt='brick' src={Brick} />
+            </div>
             )
-        } else {
+        } else if(colors.includes(tile.color)){
             return (
             <div key={`${tile.x}-${tile.y}`} className={`tile ${tile.color} ${isCursor ? `cursor-${cursor.color}` : ''}`}>
                 <img alt='bob-omb' src={Bob_Omb} />
             </div>
+            )
+        } else {
+            return (
+            <div key={`${tile.x}-${tile.y}`} className={`tile ${isCursor ? `cursor-${cursor.color}` : ''}`} onClick={() => clickOnTile(tile.x, tile.y)}></div>
             )
         }
     }
